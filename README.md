@@ -68,15 +68,6 @@ media/               # Board photos, renders, screenshots
 
 ---
 
-## Getting Started
-
-### Clone the repository
-
-```
-git clone https://github.com/nistordarius26h-ship-it/esp32s3brucey.git
-cd esp32s3brucey
-```
-
 ### Hardware
 
 Assemble the custom PCB using the schematic and BOM located in the `pcb/` directory. Populate the CC1101 and NRF24L01+ headers, PN532 and OLED on the shared I2C bus, MicroSD breakout on SPI, IR TX/RX pair, navigation buttons, and TP4056/battery/power-switch chain per the schematic.
