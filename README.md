@@ -1,89 +1,87 @@
 # ESP32-S3 Bruce Multi-Tool PCB
 
-[![Arduino](https://img.shields.io/badge/Arduino-ESP32S3-blue)](https://github.com/espressif/arduino-esp32)
+[![MCU](https://img.shields.io/badge/MCU-ESP32--S3-blue)](https://github.com/espressif/arduino-esp32)
 [![Firmware](https://img.shields.io/badge/Firmware-Bruce-purple)](https://github.com/pr3y/Bruce)
-[![Wireless](https://img.shields.io/badge/Wireless-SubGHz%2FBLE%2FNFC%2FIR-green)](#hardware)
-[![Research](https://img.shields.io/badge/Research-Embedded%20Security-orange)](#overview)
+[![PCB](https://img.shields.io/badge/PCB-Custom%20Carrier%20Board-orange)](#hardware)
 [![License](https://img.shields.io/badge/License-MIT-red)](#license)
 
 ## Overview
 
-This project is a **custom carrier PCB for the [Bruce](https://github.com/pr3y/Bruce) firmware**, built around an ESP32-S3 module. Bruce is an open-source multi-tool firmware for sniffing, capturing, and analyzing Sub-GHz, 2.4GHz, NFC, and IR signals — this board brings all of its supported peripherals together on a single, purpose-built handheld PCB with its own display, storage, buttons, and battery management.
+Custom carrier PCB for the ESP32-S3, designed to run the [Bruce](https://github.com/pr3y/Bruce) firmware. Consolidates Bruce's Sub-GHz, 2.4GHz, NFC, and IR peripheral set onto a single board with shared I2C/SPI buses, local storage, onboard display, physical UI, and LiPo power management — built as a standalone handheld unit rather than a breadboard stack of breakout modules.
 
 > **Disclaimer**
 >
-> This project is intended for educational and research purposes only. Only capture, analyze, or transmit signals on devices/networks you own or have explicit permission to test. Sub-GHz, RFID, and IR transmission/reception may be restricted or illegal depending on your jurisdiction — check local regulations before use.
+> Educational and research use only. Capture, analyze, or transmit signals only on hardware/networks you own or are authorized to test. RF and IR transmission are subject to jurisdiction-specific regulations — confirm local compliance before use.
 
 ---
 
-## Features
+## Design Summary
 
-- ESP32-S3 core running the Bruce multi-tool firmware
-- Sub-GHz sniffing/transmit via CC1101 (car fobs, garage doors, remotes)
-- 2.4GHz sniffing via NRF24L01+ PA/LNA (BLE advertisements, mousejacking, drones)
-- NFC/RFID read, write, and emulation via PN532 over I2C
-- 0.96" SSD1306 OLED for onboard menu/UI
-- MicroSD storage for captured logs, PCAPs, and configs
-- IR transmit (KY-005) and receive (KY-022 / VS1838B) for remote cloning/playback
-- 5-button navigation (Up/Down/Left/Right/Select)
-- TP4056 USB-C LiPo charging + physical power switch
-- Onboard decoupling/pull-up network for clean shared I2C and RF power rails
-
----
-
-## Technologies
-
-- C++ (Arduino IDE / ESP-IDF via Bruce firmware)
-- I2C (OLED + PN532), SPI (CC1101, NRF24L01+, MicroSD)
+| Parameter | Value |
+| --- | --- |
+| MCU | ESP32-S3 |
+| Firmware | Bruce (custom board profile / pinmap) |
+| RF front ends | CC1101 (Sub-GHz), NRF24L01+ PA/LNA (2.4GHz) |
+| NFC/RFID | PN532 V3 (I2C) |
+| Display | 0.96" SSD1306 OLED, 128x64 (I2C) |
+| Storage | MicroSD, SPI, onboard 5V→3.3V reg + level shifting |
+| IR | KY-005 TX, KY-022/VS1838B RX (GPIO) |
+| Input | 5x tactile buttons, active-low to GND |
+| Power | TP4056 (USB-C) → 3.7V 2000mAh LiPo → SPDT power switch |
+| Bus conditioning | I2C pull-ups (4.7kΩ x2), RF supply decoupling (10µF x2, 100nF x2) |
 
 ---
 
 ## Hardware
 
-| Component | Interface | Purpose |
+| Component | Interface | Function |
 | --- | --- | --- |
-| ESP32-S3 module | — | Main MCU running Bruce firmware |
-| CC1101 Sub-GHz transceiver | 2x4 header (SPI) | Sniff/capture/transmit Sub-GHz (fobs, garage doors, remotes) |
-| NRF24L01+ PA/LNA | 2x4 header (SPI) | 2.4GHz sniffing — BLE advertisements, mousejacking, drones |
-| PN532 NFC module (V3) | I2C (shared bus) | Read/write/emulate RFID tags, badges, NFC credentials |
-| 0.96" OLED (SSD1306, 128x64) | I2C (shared bus) | Onboard menu / system UI |
-| MicroSD breakout (w/ 5V→3.3V reg + level shifter) | SPI | Stores raw signal logs, PCAPs, configs/scripts |
-| IR transmitter (KY-005) | GPIO | Clone/playback/brute-force TV, AC, appliance remotes |
-| IR receiver (KY-022 / VS1838B) | GPIO | Capture/decode remote signals in real time |
-| 5x tactile buttons (active-low) | GPIO | Up / Down / Left / Right / Select |
-| TP4056 charge module | USB-C | Charging + protection for 3.7V 2000mAh LiPo |
-| 3-pin SPDT slide switch | — | Master power on/off (intercepts TP4056 output) |
-| 2x 10µF electrolytic + 2x 100nF ceramic caps | — | Decoupling/filtering at NRF24 and CC1101 headers |
-| 2x 4.7kΩ pull-ups | — | I2C_SDA / I2C_SCL bus pull-ups to 3.3V |
+| CC1101 Sub-GHz transceiver | 2x4 header, SPI | Sub-GHz capture/analysis/replay — fobs, garage/gate remotes |
+| NRF24L01+ PA/LNA | 2x4 header, SPI | 2.4GHz sniffing — BLE advertisements, mousejacking, drone links |
+| PN532 NFC module V3 | I2C (shared bus) | RFID/NFC read, write, emulation |
+| SSD1306 OLED, 128x64 | I2C (shared bus) | System UI / menu rendering |
+| MicroSD breakout | SPI, onboard reg + level shifter | Signal log / PCAP / config storage |
+| IR TX (KY-005) | GPIO | IR remote replay / brute-force |
+| IR RX (KY-022 / VS1838B) | GPIO | IR signal capture/decode |
+| 5x tactile switches | GPIO, active-low | Up / Down / Left / Right / Select |
+| TP4056 | USB-C | LiPo charge management, short-circuit protection |
+| SPDT slide switch | — | Master power cutoff on TP4056 output rail |
+| Decoupling network | — | 2x 10µF electrolytic + 2x 100nF ceramic at CC1101/NRF24 supply pins |
+| I2C pull-ups | — | 2x 4.7kΩ on SDA/SCL to 3.3V rail |
+
+---
+
+## Firmware
+
+Flash [Bruce](https://github.com/pr3y/Bruce) with pin definitions matched to this board's schematic. Custom board profile required — CC1101/NRF24 chip-select and IRQ lines, I2C bus assignment for OLED + PN532, MicroSD SPI pins, and button GPIO map are documented in `pcb/pinout.md`.
 
 ---
 
 ## Project Structure
 
 ```
-firmware/            # Bruce firmware config/build notes
-pcb/                 # Schematic, layout, and BOM files
-media/               # Board photos, renders, screenshots
+firmware/            # Bruce board profile, pin definitions, build notes
+pcb/                 # Schematic, layout, gerbers, BOM, pinout.md
+media/               # Board photos, renders, bring-up shots
 ```
 
 ---
 
-### Hardware
+## Build Notes
 
-Assemble the custom PCB using the schematic and BOM located in the `pcb/` directory. Populate the CC1101 and NRF24L01+ headers, PN532 and OLED on the shared I2C bus, MicroSD breakout on SPI, IR TX/RX pair, navigation buttons, and TP4056/battery/power-switch chain per the schematic.
-
-### Firmware
-
-Flash the [Bruce](https://github.com/pr3y/Bruce) firmware to the ESP32-S3 module, matching the pin definitions to this board's schematic (custom board profile in Bruce's config).
+- Populate RF headers (CC1101, NRF24) first, verify supply rails before adding digital peripherals.
+- Shared I2C bus (OLED + PN532) — confirm address conflicts before flashing.
+- MicroSD breakout's onboard regulator handles 5V→3.3V; do not feed 3.3V directly into its VCC pin.
+- Bring-up order: power path (TP4056 → switch → rail) → MCU boot → OLED → SPI peripherals → RF modules.
 
 ---
 
 ## Future Work
 
-- Custom Bruce board profile/pinmap submission upstream
-- 3D-printed enclosure for the handheld form factor
-- Battery life/power draw testing across peripherals
-- Companion case cutouts for OLED/buttons/USB-C
+- Upstream board profile submission to Bruce
+- Enclosure design (3D printed) sized to button/OLED/USB-C cutouts
+- Power draw characterization per peripheral, idle vs. active RF
+- Battery life benchmarking under mixed workload
 
 ---
 
@@ -96,5 +94,4 @@ MIT License
 ## Author
 
 Nistor Darius
-
-Embedded Systems • Wireless Research • Hardware Design
+Embedded Systems / Wireless Research / Hardware Design
