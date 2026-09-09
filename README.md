@@ -253,6 +253,14 @@ Bruce firmware:
 
 https://github.com/BruceDevices/firmware
 
-## Disclaimer
+## License
 
-Experimental DIY project. Use at your own risk.
+MIT License
+
+---
+
+## Author
+
+Nistor Darius
+
+Embedded Systems • Wireless Research • Hardware Design
