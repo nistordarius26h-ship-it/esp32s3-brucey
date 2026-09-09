@@ -1,97 +1,253 @@
-# ESP32-S3 Bruce Multi-Tool PCB
+# ESP32-S3 Brucey
 
-[![MCU](https://img.shields.io/badge/MCU-ESP32--S3-blue)](https://github.com/espressif/arduino-esp32)
-[![Firmware](https://img.shields.io/badge/Firmware-Bruce-purple)](https://github.com/pr3y/Bruce)
-[![PCB](https://img.shields.io/badge/PCB-Custom%20Carrier%20Board-orange)](#hardware)
-[![License](https://img.shields.io/badge/License-MIT-red)](#license)
+Custom ESP32-S3 handheld built around Bruce firmware.
 
-## Overview
+I originally made this as a carrier PCB for an ESP32-S3 and a few external modules. After building the board I also started adapting Bruce for the hardware, mainly because I wanted everything on one compact device instead of using jumper wires and separate modules.
 
-Custom carrier PCB for the ESP32-S3, designed to run the [Bruce](https://github.com/pr3y/Bruce) firmware. Consolidates Bruce's Sub-GHz, 2.4GHz, NFC, and IR peripheral set onto a single board with shared I2C/SPI buses, local storage, onboard display, physical UI, and LiPo power management — built as a standalone handheld unit rather than a breadboard stack of breakout modules.
-
-> **Disclaimer**
->
-> Educational and research use only. Capture, analyze, or transmit signals only on hardware/networks you own or are authorized to test. RF and IR transmission are subject to jurisdiction-specific regulations — confirm local compliance before use.
-
----
-
-## Design Summary
-
-| Parameter | Value |
-| --- | --- |
-| MCU | ESP32-S3 |
-| Firmware | Bruce (custom board profile / pinmap) |
-| RF front ends | CC1101 (Sub-GHz), NRF24L01+ PA/LNA (2.4GHz) |
-| NFC/RFID | PN532 V3 (I2C) |
-| Display | 0.96" SSD1306 OLED, 128x64 (I2C) |
-| Storage | MicroSD, SPI, onboard 5V→3.3V reg + level shifting |
-| IR | KY-005 TX, KY-022/VS1838B RX (GPIO) |
-| Input | 5x tactile buttons, active-low to GND |
-| Power | TP4056 (USB-C) → 3.7V 2000mAh LiPo → SPDT power switch |
-| Bus conditioning | I2C pull-ups (4.7kΩ x2), RF supply decoupling (10µF x2, 100nF x2) |
-
----
+This is still a DIY prototype. The hardware is assembled and tested, the firmware boots and the basic OLED interface works, but not every Bruce feature is fully adapted yet.
 
 ## Hardware
 
-| Component | Interface | Function |
-| --- | --- | --- |
-| CC1101 Sub-GHz transceiver | 2x4 header, SPI | Sub-GHz capture/analysis/replay — fobs, garage/gate remotes |
-| NRF24L01+ PA/LNA | 2x4 header, SPI | 2.4GHz sniffing — BLE advertisements, mousejacking, drone links |
-| PN532 NFC module V3 | I2C (shared bus) | RFID/NFC read, write, emulation |
-| SSD1306 OLED, 128x64 | I2C (shared bus) | System UI / menu rendering |
-| MicroSD breakout | SPI, onboard reg + level shifter | Signal log / PCAP / config storage |
-| IR TX (KY-005) | GPIO | IR remote replay / brute-force |
-| IR RX (KY-022 / VS1838B) | GPIO | IR signal capture/decode |
-| 5x tactile switches | GPIO, active-low | Up / Down / Left / Right / Select |
-| TP4056 | USB-C | LiPo charge management, short-circuit protection |
-| SPDT slide switch | — | Master power cutoff on TP4056 output rail |
-| Decoupling network | — | 2x 10µF electrolytic + 2x 100nF ceramic at CC1101/NRF24 supply pins |
-| I2C pull-ups | — | 2x 4.7kΩ on SDA/SCL to 3.3V rail |
+- ESP32-S3 N16R8
+  - 16 MB Flash
+  - 8 MB PSRAM
+- SSD1306 0.96" 128x64 OLED
+- CC1101 Sub-GHz module
+- NRF24L01+ 2.4 GHz module
+- PN532 NFC/RFID module
+- MicroSD reader
+- IR transmitter
+- IR receiver
+- 5 navigation buttons
+- LiPo battery
+- TP4056 charging board
+- Power switch
+- 2 external antennas
+- Local decoupling for the RF modules
 
----
+## Pinout
+
+### I2C
+
+| Function | GPIO |
+|---|---:|
+| SDA | 17 |
+| SCL | 18 |
+
+Used by the SSD1306 and PN532.
+
+### Shared SPI
+
+| Function | GPIO |
+|---|---:|
+| MOSI | 11 |
+| MISO | 13 |
+| SCK | 12 |
+
+### CC1101
+
+| Function | GPIO |
+|---|---:|
+| CS | 10 |
+| GDO0 | 2 |
+
+### NRF24L01+
+
+| Function | GPIO |
+|---|---:|
+| CSN | 14 |
+| CE | 15 |
+
+### MicroSD
+
+| Function | GPIO |
+|---|---:|
+| CS | 46 |
+
+### IR
+
+| Function | GPIO |
+|---|---:|
+| TX | 9 |
+| RX | 8 |
+
+### Buttons
+
+| Button | GPIO |
+|---|---:|
+| Up | 1 |
+| Down | 4 |
+| Left | 5 |
+| Right | 6 |
+| Select | 7 |
+
+The buttons are active-low and use the ESP32 internal pull-ups.
+
+Current button mapping:
+
+- Up: previous item
+- Down: next item
+- Left: back
+- Right: select
+- Middle: select
 
 ## Firmware
 
-Flash [Bruce](https://github.com/pr3y/Bruce) with pin definitions matched to this board's schematic. Custom board profile required — CC1101/NRF24 chip-select and IRQ lines, I2C bus assignment for OLED + PN532, MicroSD SPI pins, and button GPIO map are documented in `pcb/pinout.md`.
+The firmware is based on [Bruce](https://github.com/BruceDevices/firmware).
 
----
+This board is not an official Bruce target, so I made a custom configuration for it. The changes include:
 
-## Project Structure
+- custom board configuration
+- GPIO and pin definitions
+- button handling
+- runtime module pin configuration
+- SSD1306 initialization
+- SSD1306 menu rendering
 
+Bruce normally targets larger TFT displays. This build uses a 128x64 monochrome SSD1306, so some parts of the interface still need to be adapted.
+
+The main menu and submenus work, but some tools still use TFT-specific drawing code.
+
+I am better at the hardware side than the software side, so the firmware is something I am still learning and changing. If you build this project, expect to modify the software depending on what you want from it.
+
+## Current status
+
+Working / tested:
+
+- ESP32-S3 boots correctly
+- 16 MB Flash configured
+- 8 MB PSRAM detected
+- SSD1306 working
+- Bruce main menu working on OLED
+- navigation buttons working
+- MicroSD mounts correctly
+- I2C working on GPIO17 / GPIO18
+- CC1101 runtime pins configured
+- NRF24 runtime pins configured
+- IR pins configured
+- LiPo charging
+- power switch
+- mechanical assembly
+
+Still being tested / unfinished:
+
+- NRF24 currently reports `NRF24 not found`
+- some Bruce tools still use TFT-specific screens
+- some feature pages need SSD1306-specific display code
+- not every Bruce function has been tested
+- battery-only power needs improvement
+
+## Power
+
+The current board uses:
+
+```text
+LiPo
+  |
+TP4056
+  |
+Power switch
+  |
+ESP32-S3 VIN / 5V
 ```
-firmware/            # Bruce board profile, pin definitions, build notes
-pcb/                 # Schematic, layout, gerbers, BOM, pinout.md
-media/               # Board photos, renders, bring-up shots
+
+This works for testing, but a single-cell LiPo does not provide a real 5 V rail.
+
+During testing the 3.3 V rail dropped too low when running from the battery only. The board and OLED work much better when USB power is connected.
+
+A simple improvement is to add a small 5 V boost converter:
+
+```text
+LiPo
+  |
+TP4056
+  |
+Power switch
+  |
+5 V boost converter
+  |
+ESP32-S3 VIN / 5V
 ```
 
----
+That should give the onboard regulator enough headroom and improve stability, especially with the RF modules active.
 
-## Build Notes
+A future PCB revision could use a proper 3.3 V buck-boost supply instead.
 
-- Populate RF headers (CC1101, NRF24) first, verify supply rails before adding digital peripherals.
-- Shared I2C bus (OLED + PN532) — confirm address conflicts before flashing.
-- MicroSD breakout's onboard regulator handles 5V→3.3V; do not feed 3.3V directly into its VCC pin.
-- Bring-up order: power path (TP4056 → switch → rail) → MCU boot → OLED → SPI peripherals → RF modules.
+## Build
 
----
+The firmware is built with PlatformIO.
 
-## Future Work
+Build:
 
-- Upstream board profile submission to Bruce
-- Enclosure design (3D printed) sized to button/OLED/USB-C cutouts
-- Power draw characterization per peripheral, idle vs. active RF
-- Battery life benchmarking under mixed workload
+```bash
+pio run -e bruce-handheld-s3
+```
 
----
+Upload:
 
-## License
+```bash
+pio run -e bruce-handheld-s3 -t upload
+```
 
-MIT License
+Serial monitor:
 
----
+```bash
+pio device monitor -b 115200
+```
 
-## Author
+## Notes
 
-Nistor Darius
-Embedded Systems / Wireless Research / Hardware Design
+The CC1101, NRF24 and MicroSD share the same SPI lines and use separate chip-select pins.
+
+The PN532 is used in I2C mode together with the SSD1306.
+
+Current NRF24 configuration:
+
+```text
+SCK  = 12
+MISO = 13
+MOSI = 11
+CSN  = 14
+CE   = 15
+```
+
+Current CC1101 configuration:
+
+```text
+SCK   = 12
+MISO  = 13
+MOSI  = 11
+CS    = 10
+GDO0  = 2
+```
+
+Current MicroSD configuration:
+
+```text
+SCK  = 12
+MISO = 13
+MOSI = 11
+CS   = 46
+```
+
+## Project status
+
+This is a working prototype, not a finished product.
+
+The hardware side is mostly done. The main work left is firmware cleanup, testing the external modules and adapting more of Bruce's TFT-oriented screens to the SSD1306.
+
+## Intended use
+
+Made for electronics, embedded development, RF/NFC/IR experiments and learning.
+
+Use wireless and security-related functions only on systems and devices you own or have permission to test.
+
+## Credits
+
+Bruce firmware:
+
+https://github.com/BruceDevices/firmware
+
+## Disclaimer
+
+Experimental DIY project. Use at your own risk.
