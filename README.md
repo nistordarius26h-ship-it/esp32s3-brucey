@@ -1,5 +1,10 @@
 # ESP32-S3 Brucey
 
+[![MCU](https://img.shields.io/badge/MCU-ESP32--S3-blue)](https://github.com/espressif/arduino-esp32)
+[![Firmware](https://img.shields.io/badge/Firmware-Bruce-purple)](https://github.com/pr3y/Bruce)
+[![PCB](https://img.shields.io/badge/PCB-Custom%20Carrier%20Board-orange)](#hardware)
+[![License](https://img.shields.io/badge/License-MIT-red)](#license)
+
 Custom ESP32-S3 handheld built around Bruce firmware.
 
 I originally made this as a carrier PCB for an ESP32-S3 and a few external modules. After building the board I also started adapting Bruce for the hardware, mainly because I wanted everything on one compact device instead of using jumper wires and separate modules.
