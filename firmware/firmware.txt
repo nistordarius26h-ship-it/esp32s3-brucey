@@ -1,1 +1,12 @@
-firmware
+Current firmware: ESP-HACK-BRUCEY-S3-v24-final.zip
+
+Legacy firmware: bruce-handheld-s3-legacy.zip
+
+Current wiring:
+OLED/PN532: SDA17 SCL18
+RF SPI: SCK12 MOSI11 MISO13
+SD: SCK12 MOSI11 MISO3 CS46
+CC1101: CS10 GDO0=2
+NRF24: CSN14 CE15
+IR: TX9 RX8
+Buttons: UP1 DOWN4 BACK5 RIGHT6 OK7
