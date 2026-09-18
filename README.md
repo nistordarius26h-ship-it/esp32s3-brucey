@@ -2,7 +2,9 @@
 
 Custom ESP32-S3 N16R8 handheld with SSD1306 OLED, CC1101, NRF24L01+, PN532, MicroSD and IR.
 
-The current firmware in this repository is the hardware-specific ESP-HACK port used on this device. The older Bruce custom-target package is kept as a legacy archive.
+![Brucey assembled hardware](media/brucey_final_build.jpg)
+
+The current firmware in this repository is the hardware-specific ESP-HACK port used on this device.
 
 ## Hardware
 
@@ -47,10 +49,10 @@ PN532 uses the same I2C bus as the OLED. PN532 mode is switch 1 ON / switch 2 OF
 
 ## Firmware
 
-Current archive:
+Current compact source archive:
 
 ```text
-firmware/ESP-HACK-BRUCEY-S3-v24-final.zip
+firmware/ESP-HACK-BRUCEY-S3-v24.3-compact-final.zip
 ```
 
 PlatformIO environment:
@@ -59,9 +61,7 @@ PlatformIO environment:
 BRUCEY_S3_SSD1306
 ```
 
-V24 includes the current board-specific OLED/button/SPI/I2C adaptations plus the added hardware menus and tools.
-
-IR menu now contains separate normal and repeated modes:
+The IR menu includes separate normal and repeated modes:
 
 ```text
 Send
@@ -112,10 +112,10 @@ pio device monitor -b 115200
 
 ## Repository layout
 
-- `firmware/ESP-HACK-BRUCEY-S3-v24-final.zip` — current firmware
-- `firmware/bruce-handheld-s3-legacy.zip` — earlier Bruce custom-target files
+- `firmware/ESP-HACK-BRUCEY-S3-v24.3-compact-final.zip` — current firmware source
 - `docs/pinout.md` — current wiring
 - `pcb/` — PCB manufacturing files
-- `media/` — project images
+- `media/brucey_final_build.jpg` — assembled hardware photo
+- `media/` — additional project images
 
 This remains a DIY prototype; firmware behavior should be validated on the actual hardware after each update.
