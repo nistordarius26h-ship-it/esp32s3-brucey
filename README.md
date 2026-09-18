@@ -2,7 +2,7 @@
 
 Custom ESP32-S3 N16R8 handheld with SSD1306 OLED, CC1101, NRF24L01+, PN532, MicroSD and IR.
 
-![Brucey assembled hardware](media/brucey_final_build.jpg)
+<img width="400" alt="IMG_20260915_202742_1789493424797edit" src="https://github.com/user-attachments/assets/3450b709-ea62-4022-9c81-92590cc04288" />
 
 The current firmware in this repository is the hardware-specific ESP-HACK port used on this device.
 
